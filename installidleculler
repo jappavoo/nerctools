@@ -1,0 +1,22 @@
+#!/bin/bash
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+IDLECULLER_DEFAULT_MINUTES=5
+
+minutes=$1
+
+if crontab -l | grep nercidle; then
+   echo "Looks like the nercidle culler is already setup to run."
+   echo "you need to edit it manually to update it with : crontab -e"
+   exit -1
+fi
+
+if [[ -z $minutes ]] && [[ -a $configdir/idleculler ]]; then
+     minutes=$(cat $configdir/idleculler)
+fi
+
+[[ -z $minutes ]] && minutes=$IDLECULLER_DEFAULT_MINUTES
+
+crontab <<EOF
+*/$minutes * * * * $scriptdir/nercidle && touch /tmp/shutdown
+EOF
