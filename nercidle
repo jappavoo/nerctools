@@ -1,1 +1,42 @@
 #!/bin/bash
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+
+LASTIDLE=${LASTIDLE:-/tmp/$user.lastidle}
+DEFAULTIDLESEC=$((60 * 30))
+
+if [[ -a $LASTIDLE ]]; then
+  last=$(cat $LASTIDLE)
+fi
+
+group=${1:-data}
+users=$(grep ^$group /etc/group)
+users=${users##*:}
+IDLESEC=$2
+
+if [[ -z $IDLESEC ]]; then
+    if  [[ -a $configdir/default_idlesec ]]; then
+	IDLSEC=$(cat $configdir/default_idlesec)
+    else
+	IDLSEC=$DEFAULTIDLESEC
+    fi
+fi
+    
+    
+n=$(ps u --no-header  -u ${users//,/ -u } | wc -l)
+now=$(date +%s)
+if (( n == 0 )); then
+   if [[ -n $last ]]; then
+       diff=$(( now - last ))
+       if (( diff > IDLESECS )); then
+	   return 0
+       fi
+   else
+       echo $now > $LASTIDLE
+   fi
+else
+   rm $LASTIDLE
+   return 1
+fi
+
+    
