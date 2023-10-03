@@ -1,0 +1,15 @@
+#!/bin/bash
+#!/bin/bash
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+
+DEFAULTACTION="touch /tmp/nercidle"
+IDLEACTION="$@"
+
+if [[ -z $IDLEACTION ]] && [[ -a $configdir/onidle ]]; then
+  IDLEACTION="$(cat $configdir/onidle)"
+fi
+
+[[ -z "$IDLEACTION" ]] && IDLEACTION="$DEFAULTACTION"
+
+$IDLEACTION

@@ -18,5 +18,5 @@ fi
 [[ -z $minutes ]] && minutes=$IDLECULLER_DEFAULT_MINUTES
 
 crontab <<EOF
-*/$minutes * * * * $scriptdir/nercidle && touch /tmp/shutdown
+*/$minutes * * * * $scriptdir/nercidle && $scriptdir/onidle
 EOF
