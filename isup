@@ -1,0 +1,34 @@
+#!/bin/bash
+#set -x
+OSCMD=${OSCMD:-openstack}
+
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+
+if [[ -z $CREDRC ]] && [[ -a $configdir/default_cred.rc ]]; then
+   CREDRC=$configdir/default_cred.rc
+fi
+if [[ -z $CREDRC ]]; then
+  echo "$0: ERROR: no credential rc file specified via CREDRC environment variable and no default configured." > /dev/stderr
+  exit -1
+fi   
+
+source $CREDRC
+
+# simple way to test if the ssh server is up is to use an ssh command
+# that is known to fail due to bad authentication or other user error
+# with a short connection time out... this way if the system is down
+# we can figure it out quickly ... however if it is up then we will
+# fail quickly due an early rejection... at least that my story and
+# I am sticking to it ;-)
+function isup()
+{
+ #   set -x
+    local s=$1
+#    ! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
+    ! $OSCMD server ssh $s -- -v -l nobody -i /dev/null  -o ConnectTimeout=1 true 2>&1 | grep -i  "timed out"
+    return $?
+}
+
+
+isup $1

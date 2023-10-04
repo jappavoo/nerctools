@@ -1,0 +1,68 @@
+#!/bin/bash
+#set -x
+NUM_RETRY=10
+SLEEP=$((60 * 1))
+OSCMD=${OSCMD:-openstack}
+
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+
+if [[ -z $CREDRC ]] && [[ -a $configdir/default_cred.rc ]]; then
+   CREDRC=$configdir/default_cred.rc
+fi
+if [[ -z $CREDRC ]]; then
+  echo "$0: ERROR: no credential rc file specified via CREDRC environment variable and no default configured." > /dev/stderr
+  exit -1
+fi   
+
+source $CREDRC
+
+server=$1
+
+if [[ -z $server ]] && [[ -a $configdir/default_server ]]; then
+   server=$(cat $configdir/default_server)
+fi
+if [[ -z $server ]]; then
+  echo "$0: ERROR: no server instance specified and no default configured"
+  exit -1
+fi
+
+# simple way to test if the ssh server is up is to use an ssh command
+# that is known to fail due to bad authentication or other user error
+# with a short connection time out... this way if the system is down
+# we can figure it out quickly ... however if it is up then we will
+# fail quickly due an early rejection... at least that my story and
+# I am sticking to it ;-)
+function isup()
+{
+ #   set -x
+    local s=$1
+
+    #! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
+    # not sure if we really need  ConnectionAttempts=1 so default behaviour for the moment is not to use it
+    ! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 true 2>&1 | grep -i  "timed out"
+    return $?
+}
+
+for ((i=0; i<NUM_RETRY; i++)); do
+    if isup $server; then
+       break;
+    else
+	[[ -z $NERCSSH_SILENT ]] && echo "$server is not ACTIVE...starting it up... be patient" > /dev/stderr
+	if $OSCMD server start $server 2>&1 > /dev/stderr; then
+	    [[ -z $NERCSSH_SILENT ]] && echo "Sent start command : $OSCMD server start $server" > /dev/stderr
+	else
+	    [[ -z $NERCSSH_SILENT ]] && echo "Start command failed will try again if needed" > /dev/stderr
+	fi
+	[[ -z $NERCSSH_SILENT ]] && echo "sleeping for $SLEEP seconds .... while we wait for the system come back up" > /dev/stderr
+	sleep $SLEEP 
+    fi
+done
+
+if ((i==NUM_RETRY)); then
+    echo "WTF!!! Was not able to start $server or at least not confirm it is ACTIVE" > /dev/stderr
+    exit -1
+fi
+shift
+
+exec $OSCMD server ssh $server -- $@
