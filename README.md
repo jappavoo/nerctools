@@ -1,11 +1,15 @@
 # nerctools
 
+This repository is for tools that make using nerc openstack resources a little easier for my groups use case.  In particular we want our vm's to be ondemand --- shut down when they are "idle" and automatically started when we a user attempts to ssh to them.
+
 These tools assume you have the openstack command line client installed
 - https://nerc-project.github.io/nerc-docs/openstack/advanced-openstack-topics/openstack-cli/openstack-CLI/#install-the-openstack-command-line-clients
-- this repo requires that you have a copy of the application credentials for our project ... ask jappavoo@bu.edu for a copy
+- this repo also requires that you have a copy of the application credentials for our project ... ask your nerc project admin for a copy -- you will need to place it in the config directory as `default_cred.rc`
+- your project admin will want to setup the idleculler on your servers
+- the main tool is `openstackssh` -- see below
 
 
-Repository to make using nerc resources easier
+
 
 
 ## `openstackssh`
