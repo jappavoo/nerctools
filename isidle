@@ -5,7 +5,7 @@ scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 
 LASTIDLE=${LASTIDLE:-/tmp/$USER.lastidle}
-DEFAULTIDLESEC=$((60 * 30))
+DEFAULTIDLESEC=$(( 60 * 30 ))
 
 if [[ -a $LASTIDLE ]]; then
   last=$(cat $LASTIDLE)
