@@ -3,6 +3,9 @@
 scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 
+# if we are forced no idle then always return -1 
+[[ -a $configdir/forcenolifetime ]] && exit 0
+
 LIFETIMESTART=${LIFETIMESTART:-/tmp/$USER.lifetimestart}
 DEFAULTLIFETIME=$(( 60 * 60 * 12 ))
 DEFAULTWARNINGLIFETIME=$(( 60 * 60 * 6 ))

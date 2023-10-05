@@ -45,10 +45,20 @@ Host JA-CC-jup
 You can configure and influence the behaviour of the tools by placing appropriately name files in this directory.
 The following describes each of the files, what they influence and what put in them.
 
+
 ### `config/default_cred.sh`
 
 The application credential file that was obtained from the openstack project administrator.  This contains secrets and
 should be secured appropriately.  Do not put on public repos or in places where its contents can be read by other users.
+
+### `config/forcenoidle`
+
+If you touch this file you can supress idle detection. `isidle` will always return -1
+
+### `config/forcenolifetime`
+
+if you touch this file you can supress checklifetime behaviour it will always immediately return 0, skipping the checking
+of max and warning lifetime limits.
 
 ### `config/idleusers`
 
