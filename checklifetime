@@ -25,6 +25,8 @@ if [[ -z $WARNINGLIFETIME ]]; then
     fi    
 fi
 
+now=$(date +%s)
+
 if [[ ! -a $LIFETIMESTART ]]; then
     echo $now > $LIFETIMESTART
 else
