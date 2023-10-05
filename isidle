@@ -25,7 +25,7 @@ else
 fi
 
 if [[ -a $connfigdir/idleusers ]]; then
-    users=$(cat $connfigdir/idleusers)
+    users=$(cat $configdir/idleusers)
 fi
 
 if [[ -n "$@" ]]; then
