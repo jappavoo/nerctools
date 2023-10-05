@@ -30,7 +30,7 @@ if [[ ! -a $LIFETIMESTART ]]; then
 else
     start=$(cat $LIFETIMESTART)
     diff=$(( now - start ))
-    if (( diff % WARNINGPERIOD == 0 )); then
+    if (( diff % WARNINGLIFETIME == 0 )); then
 	$scriptdir/onlifetimewarning
     fi
     if (( diff > MAXLIFETIME )); then
