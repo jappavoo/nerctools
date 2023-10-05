@@ -1,6 +1,6 @@
 # nerctools
 
-This repository is for tools that make using nerc openstack resources a little easier for my groups use case.  In particular we want our vm's to be ondemand --- shut down when they are "idle" and automatically started when we a user attempts to ssh to them.
+This repository is for tools that make using nerc openstack resources a little easier for my group's use case.  In particular, we want our vm's to be ondemand --- shut down when they are "idle" and automatically started when a user attempts to ssh to them.
 
 These tools assume you have the openstack command line client installed
 - https://nerc-project.github.io/nerc-docs/openstack/advanced-openstack-topics/openstack-cli/openstack-CLI/#install-the-openstack-command-line-clients
@@ -27,8 +27,6 @@ ssh config to use openstackssh transparently.  The following example  assumes:
 ```
 Host JA-CC
      User jappavoo
-#     ProxyCommand openstack server ssh JA-CC -- -l jappavoo -W 127.0.0.1:22
-#     ProxyCommand /Users/jappavoo/Work/nerctools/nercssh JA-CC -l jappavoo -W 127.0.0.1:22
      ProxyCommand ~/Work/nerctools/openstackssh %n -l %r -W 127.0.0.1:%p
 
 Host JA-CC-jup
