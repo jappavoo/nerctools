@@ -10,7 +10,7 @@ MAXLIFETIME=$1
 WARNINGLIFETIME=$2
 
 if [[ -z $MAXLIFETIME ]]; then
-    if  [[ -a $configdir/maxlifetime_sec ]]; then
+    if  [[ -a $configdir/maxlifetimesec ]]; then
         MAXLIFETIME=$(cat $configdir/maxlifetimesec)
     else
         MAXLIFETIME=$DEFAULTLIFETIME
@@ -18,7 +18,7 @@ if [[ -z $MAXLIFETIME ]]; then
 fi
 
 if [[ -z $WARNINGLIFETIME ]]; then
-    if  [[ -a $configdir/warninglifetime_sec ]]; then
+    if  [[ -a $configdir/warninglifetimesec ]]; then
         WARNINGLIFETIME=$(cat $configdir/warninglifetimesec)
     else
         WARNINGLIFETIME=$DEFAULTWARNINGLIFETIME
