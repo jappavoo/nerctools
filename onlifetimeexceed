@@ -1,0 +1,17 @@
+#!/bin/bash                                                                                          
+#!/bin/bash                                                                                          
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+LIFETIMESTART=${LIFETIMESTART:-/tmp/$USER.lifetimestart}
+DEFAULTACTION="touch /tmp/$USER.lifetimeexceed"
+EXCEEDACTION="$@"
+
+[[ -a $LIFETIMESTART]] && rm $LIFETIMESTART
+
+if [[ -z $EXCEEDACTION ]] && [[ -a $configdir/onlifetimeexceed ]]; then
+  EXCEEDACTION="$(cat $configdir/onlifetimeexceed)"
+fi
+
+[[ -z "$EXCEEDACTION" ]] && EXCEEDACTION="$DEFAULTACTION"
+
+$EXCEEDACTION

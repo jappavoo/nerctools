@@ -18,5 +18,5 @@ fi
 [[ -z $minutes ]] && minutes=$IDLECULLER_DEFAULT_MINUTES
 
 crontab <<EOF
-*/$minutes * * * * $scriptdir/isidle && $scriptdir/onidle
+*/$minutes * * * * $scriptdir/checklifetime && $scriptdir/isidle && $scriptdir/onidle
 EOF

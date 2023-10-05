@@ -1,0 +1,14 @@
+#!/bin/bash                                                                                          
+#!/bin/bash                                                                                          
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+DEFAULTACTION="touch /tmp/$USER.lifetimewarning"
+WARNINGACTION="$@"
+
+if [[ -z $WARNINGACTION ]] && [[ -a $configdir/onlifetimewarning ]]; then
+  WARNINGACTION="$(cat $configdir/onlifetimewarning)"
+fi
+
+[[ -z "$WARNINGACTION" ]] && WARNINGACTION="$DEFAULTACTION"
+
+$WARNINGACTION

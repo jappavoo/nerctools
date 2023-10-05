@@ -11,25 +11,52 @@ if [[ -a $LASTIDLE ]]; then
   last=$(cat $LASTIDLE)
 fi
 
-group=${1:-data}
-users=$(grep ^$group /etc/group)
-users=${users##*:}
-IDLESEC=$2
+
+IDLESEC=$1
 
 if [[ -z $IDLESEC ]]; then
-    if  [[ -a $configdir/default_idlesec ]]; then
+    if  [[ -a $configdir/idlesec ]]; then
         IDLSEC=$(cat $configdir/default_idlesec)
     else
         IDLSEC=$DEFAULTIDLESEC
+    fi
+else
+    shift
+fi
+
+if [[ -a $connfigdir/idleusers ]]; then
+    users=$(cat $connfigdir/idleusers)
+fi
+
+if [[ -n "$@" ]]; then
+    # extra command line arguments are assumed to be additional users users
+    if [[ -z $users ]]; then
+	users="$@"
+    else 
+	users="$users $@"
+    fi
+fi
+
+if [[ -a $configdir/idlegroup ]]; then
+    group=$(cat $configdir/idlegroup)
+    grpusers=$(grep ^$group /etc/group)
+    grpusers=${grpusers##*:}
+    grpusers=${grpusers//,/ }
+    if [[ -z $users ]]; then
+	users="$grpusers"
+    else
+	users="$users $grpusers"
     fi
 fi
 
 if [[ -z $users ]]; then
     n=0
 else
-    n=$(ps u --no-header  -u ${users//,/ -u } | wc -l)
+    n=$(ps u --no-header  -u ${users// / -u } | wc -l)
 fi
+
 now=$(date +%s)
+
 if (( n == 0 )); then
    if [[ -n $last ]]; then
        diff=$(( now - last ))
