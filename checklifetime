@@ -3,7 +3,7 @@
 scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 
-# if we are forced no idle then always return -1 
+# if we are forced not to check lifetime limits simply return 0 
 [[ -a $configdir/forcenolifetime ]] && exit 0
 
 LIFETIMESTART=${LIFETIMESTART:-/tmp/$USER.lifetimestart}

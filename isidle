@@ -4,7 +4,7 @@
 scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 
-# if we are forced no idle then always return -1 
+# if we are forced not to check idle then always return -1 
 [[ -a $configdir/forcenoidle ]] && exit -1
 
 LASTIDLE=${LASTIDLE:-/tmp/$USER.lastidle}
