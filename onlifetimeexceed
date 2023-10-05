@@ -3,10 +3,12 @@
 scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 LIFETIMESTART=${LIFETIMESTART:-/tmp/$USER.lifetimestart}
+LASTIDLE=${LASTIDLE:-/tmp/$USER.lastidle}
 DEFAULTACTION="touch /tmp/$USER.lifetimeexceed"
 EXCEEDACTION="$@"
 
 [[ -a $LIFETIMESTART ]] && rm $LIFETIMESTART
+[[ -a $LASTIDLE ]] && rm $LASTIDLE
 
 if [[ -z $EXCEEDACTION ]] && [[ -a $configdir/onlifetimeexceed ]]; then
   EXCEEDACTION="$(cat $configdir/onlifetimeexceed)"

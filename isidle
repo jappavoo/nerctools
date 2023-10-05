@@ -61,6 +61,7 @@ if (( n == 0 )); then
    if [[ -n $last ]]; then
        diff=$(( now - last ))
        if (( diff > IDLESEC )); then
+	   echo "now:$now last:$last diff:$diff" > /tmp/$USER.idle.info
            exit 0
        fi
    else

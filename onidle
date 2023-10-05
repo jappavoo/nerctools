@@ -3,10 +3,12 @@
 scriptdir=$(dirname $(realpath $0))
 configdir=$scriptdir/config
 LASTIDLE=${LASTIDLE:-/tmp/$USER.lastidle}
+LIFETIMESTART=${LIFETIMESTART:-/tmp/$USER.lifetimestart}
 DEFAULTACTION="touch /tmp/$USER.nercidle"
 IDLEACTION="$@"
 
 [[ -a $LASTIDLE ]] && rm $LASTIDLE
+[[ -a $LIFETIMESTART ]] && rm $LIFETIMESTART
 
 if [[ -z $IDLEACTION ]] && [[ -a $configdir/onidle ]]; then
   IDLEACTION="$(cat $configdir/onidle)"
