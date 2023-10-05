@@ -16,7 +16,7 @@ IDLESEC=$1
 
 if [[ -z $IDLESEC ]]; then
     if  [[ -a $configdir/idlesec ]]; then
-        IDLESEC=$(cat $configdir/default_idlesec)
+        IDLESEC=$(cat $configdir/idlesec)
     else
         IDLESEC=$DEFAULTIDLESEC
     fi
