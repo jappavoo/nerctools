@@ -23,12 +23,22 @@ source $CREDRC
 # I am sticking to it ;-)
 function isup()
 {
- #   set -x
+#    set -x
     local s=$1
-#    ! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
-    ! $OSCMD server ssh $s -- -v -l nobody -i /dev/null  -o ConnectTimeout=1 true 2>&1 | grep -i  "timed out"
-    return $?
+    local out
+    local rc=0
+    
+    #! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o "StrictHostKeyChecking no" ConnectTimeout=1 -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
+    # not sure if we really need  ConnectionAttempts=1 so default behaviour for the moment is not to use it
+    out=$($OSCMD server ssh $s -- -l nobody -i /dev/null -v -o 'StrictHostKeyChecking\ no' -o ConnectTimeout=1 true 2>&1)
+    if [[ $out =~ ^No\ server.*$ ]]; then
+	rc=1
+    elif [[ $out =~ ^.*Operation\ timed\ out.* ]]; then
+	rc=2
+    else
+	rc=0
+    fi
+    return $rc
 }
-
 
 isup $1
