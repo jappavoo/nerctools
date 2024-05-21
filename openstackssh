@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 # not we force no strict host key checking as when VM's get rebuilt their
 # host keys will often get regenerated
 NUM_RETRY=10
@@ -44,7 +44,10 @@ function isup()
     
     #! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o "StrictHostKeyChecking no" ConnectTimeout=1 -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
     # not sure if we really need  ConnectionAttempts=1 so default behaviour for the moment is not to use it
-    out=$($OSCMD server ssh $s -- -l nobody -i /dev/null -v -o 'StrictHostKeyChecking\ no' -o ConnectTimeout=1 true 2>&1)
+    out=$($OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 true 2>&1)
+    # rather than ignoring known_host logic we changed our approach to removing it from known hosts when we recreate the vm and if this proves to not work stably the
+    # following ignores known_hosts and avoids a new entry for the host
+#    out=$($OSCMD server ssh $s -- -l nobody -i /dev/null -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=1 true 2>&1)    
     if [[ $out =~ ^No\ server.*$ ]]; then
 	rc=1
     elif [[ $out =~ ^.*Operation\ timed\ out.* ]]; then
@@ -66,6 +69,10 @@ for ((i=0; i<NUM_RETRY; i++)); do
 	    # server does not exist so we must create it.  creation also starts
 	    [[ -z $NERCSSH_SILENT ]] && echo "$server does not EXIST ...creating and starting it up... be patient" > /dev/stderr
 	    [[ -z $CREATE_ARGS && -a $configdir/$server ]] && . $configdir/$server
+	    # recreating the vm causes its host key to be regenerated.  This is a pain as it will cause ssh to reject connections
+	    # as the old entry for the host is not correct.  To make out lives easier we remove the host from the known_host file -- this avoids us having to ignore known_hosts logic
+	    ssh-keygen -R $server
+	    ssh-keygen -R $FLOAT_IP
 	    $OSCMD server create --wait --security-group default  --security-group ssh_only $CREATE_ARGS $server
 	    [[ -n $FLOAT_IP ]] && $OSCMD server add floating ip $server $FLOAT_IP
 	    ;;
@@ -89,4 +96,7 @@ if ((i==NUM_RETRY)); then
 fi
 shift
 
-exec $OSCMD server ssh $server -- -o 'StrictHostKeyChecking\ no' $@
+exec $OSCMD server ssh $server -- $@
+# rather than ignoring known_host logic we changed our approach to removing it from known hosts when we recreate the vm and if this proves to not work stably the
+# following ignores known_hosts and avoids a new entry for the host
+#exec $OSCMD server ssh $server -- -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null  $@
