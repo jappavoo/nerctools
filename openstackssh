@@ -2,10 +2,10 @@
 #set -x
 # not we force no strict host key checking as when VM's get rebuilt their
 # host keys will often get regenerated
-NUM_RETRY=10
+OPENSTACKSSH_NUM_RETRY=${OPENSTACKSSH_NUM_RETRY:-10}
 # comment next line to permit known_host update
-NO_KNOWNHOSTS=1
-SLEEP=$((60 * 1))
+OPENSTACKSSH_NO_KNOWNHOSTS=${OPENSTACKSSH_NO_KNOWNHOSTS:-1}
+OPENSTACKSSH_SLEEP=${OPENSTACKSSH_SLEEP:-$((60 * 1))}
 OSCMD=${OSCMD:-openstack}
 
 scriptdir=$(dirname $(realpath $0))
@@ -46,7 +46,7 @@ function isup()
     
     #! $OSCMD server ssh $s -- -l nobody -i /dev/null -v -o "StrictHostKeyChecking no" ConnectTimeout=1 -o ConnectTimeout=1 -o ConnectionAttempts=1 true 2>&1 | grep -i  "timed out"
     # not sure if we really need  ConnectionAttempts=1 so default behaviour for the moment is not to use it
-    if [[ -z ${NO_KNOWNHOSTS} ]]; then
+    if [[ -z ${OPENSTACKSSH_NO_KNOWNHOSTS} ]]; then
 	# rather than ignoring known_host logic we changed our approach to removing it from known hosts when we recreate the vm and if this proves to not work stably the
 	out=$($OSCMD server ssh $s -- -l nobody -i /dev/null -v -o ConnectTimeout=1 true 2>&1)
     else
@@ -63,7 +63,7 @@ function isup()
     return $rc
 }
 
-for ((i=0; i<NUM_RETRY; i++)); do
+for ((i=0; i<OPENSTACKSSH_NUM_RETRY; i++)); do
     isup $server
     case $? in
 	0)
@@ -72,7 +72,7 @@ for ((i=0; i<NUM_RETRY; i++)); do
 	    ;;
 	1)
 	    # server does not exist so we must create it.  creation also starts
-	    [[ -z $NERCSSH_SILENT ]] && echo "$server does not EXIST ...creating and starting it up... be patient" > /dev/stderr
+	    [[ -z $OPENSTACKSSH_SILENT ]] && echo "$server does not EXIST ...creating and starting it up... be patient" > /dev/stderr
 	    [[ -z $CREATE_ARGS && -a $configdir/$server ]] && . $configdir/$server
 	    # recreating the vm causes its host key to be regenerated.  This is a pain as it will cause ssh to reject connections
 	    # as the old entry for the host is not correct.  To make out lives easier we remove the host from the known_host file -- this avoids us having to ignore known_hosts logic
@@ -83,25 +83,25 @@ for ((i=0; i<NUM_RETRY; i++)); do
 	    ;;
 	2)
 	    # server exists but does not seem to be started
-	    [[ -z $NERCSSH_SILENT ]] && echo "$server is not ACTIVE...starting it up... be patient" > /dev/stderr
+	    [[ -z $OPENSTACKSSH_SILENT ]] && echo "$server is not ACTIVE...starting it up... be patient" > /dev/stderr
 	    if $OSCMD server start $server 2>&1 > /dev/stderr; then
-		[[ -z $NERCSSH_SILENT ]] && echo "Sent start command : $OSCMD server start $server" > /dev/stderr
+		[[ -z $OPENSTACKSSH_SILENT ]] && echo "Sent start command : $OSCMD server start $server" > /dev/stderr
 	    else
-		[[ -z $NERCSSH_SILENT ]] && echo "Start command failed will try again if needed" > /dev/stderr
+		[[ -z $OPENSTACKSSH_SILENT ]] && echo "Start command failed will try again if needed" > /dev/stderr
 	    fi
 	    ;;
     esac
-    [[ -z $NERCSSH_SILENT ]] && echo "sleeping for $SLEEP seconds .... while we wait for the system come back up" > /dev/stderr
-    sleep $SLEEP 
+    [[ -z $OPENSTACKSSH_SILENT ]] && echo "sleeping for $OPENSTACKSSH_SLEEP seconds .... while we wait for the system come back up" > /dev/stderr
+    sleep $OPENSTACKSSH_SLEEP 
 done
 
-if ((i==NUM_RETRY)); then
+if ((i==OPENSTACKSSH_NUM_RETRY)); then
     echo "WTF!!! Was not able to start $server or at least not confirm it is ACTIVE" > /dev/stderr
     exit -1
 fi
 shift
 
-if [[ -z ${NO_KNOWNHOSTS} ]]; then
+if [[ -z ${OPENSTACKSSH_NO_KNOWNHOSTS} ]]; then
     # rather than ignoring known_host logic we changed our approach to removing it from known hosts when we recreate the vm and if this proves to not work stably the
     exec $OSCMD server ssh $server -- $@
 else 
