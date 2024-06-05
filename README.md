@@ -27,6 +27,9 @@ ssh config to use openstackssh transparently.  The following example  assumes:
 ```
 Host JA-CC
      User jappavoo
+     StrictHostKeyChecking no
+     UserKnownHostsFile /dev/null
+     GlobalKnownHostsFile /dev/null 
      ProxyCommand ~/Work/nerctools/openstackssh %n -l %r -W 127.0.0.1:%p
 
 Host JA-CC-jup
