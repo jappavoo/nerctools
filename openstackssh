@@ -76,8 +76,8 @@ for ((i=0; i<OPENSTACKSSH_NUM_RETRY; i++)); do
 	    [[ -z $CREATE_ARGS && -a $configdir/$server ]] && . $configdir/$server
 	    # recreating the vm causes its host key to be regenerated.  This is a pain as it will cause ssh to reject connections
 	    # as the old entry for the host is not correct.  To make out lives easier we remove the host from the known_host file -- this avoids us having to ignore known_hosts logic
-	    ssh-keygen -R $server
-	    ssh-keygen -R $FLOAT_IP
+	    ssh-keygen -q -R $server >/dev/null 2>&1
+	    ssh-keygen -q -R $FLOAT_IP >/dev/null 2>&1
 	    $OSCMD server create --wait --security-group default  --security-group ssh_only $CREATE_ARGS $server
 	    [[ -n $FLOAT_IP ]] && $OSCMD server add floating ip $server $FLOAT_IP
 	    ;;
@@ -104,7 +104,8 @@ shift
 if [[ -z ${OPENSTACKSSH_NO_KNOWNHOSTS} ]]; then
     # rather than ignoring known_host logic we changed our approach to removing it from known hosts when we recreate the vm and if this proves to not work stably the
     exec $OSCMD server ssh $server -- $@
-else 
+else
+    ssh-keygen -q -R $server >/dev/null 2>&1
     # following ignores known_hosts and avoids a new entry for the host
     exec $OSCMD server ssh $server -- -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null  $@
 fi
