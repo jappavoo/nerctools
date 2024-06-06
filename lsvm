@@ -17,4 +17,3 @@ fi
 source $CREDRC
 
 openstack server list --fit-width
-
