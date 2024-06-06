@@ -1,0 +1,20 @@
+#!/bin/bash
+#set -x
+
+OSCMD=${OSCMD:-openstack}
+
+scriptdir=$(dirname $(realpath $0))
+configdir=$scriptdir/config
+
+if [[ -z $CREDRC ]] && [[ -a $configdir/default_cred.rc ]]; then
+   CREDRC=$configdir/default_cred.rc
+fi
+if [[ -z $CREDRC ]]; then
+  echo "$0: ERROR: no credential rc file specified via CREDRC environment variable and no default configured." > /dev/stderr
+  exit -1
+fi   
+
+source $CREDRC
+
+openstack server list --fit-width
+
